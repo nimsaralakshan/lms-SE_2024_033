@@ -1,4 +1,3 @@
-
 package lms.model;
 
 public class Book extends LibraryItem {

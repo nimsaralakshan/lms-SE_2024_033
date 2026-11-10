@@ -1,15 +1,27 @@
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+package lms;
+
+import lms.model.Book;
+import lms.model.Member;
+import lms.service.Library;
+
 public class Main {
     public static void main(String[] args) {
-        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-        // to see how IntelliJ IDEA suggests fixing it.
-        System.out.printf("Hello and welcome!");
+        Library library = new Library();
 
-        for (int i = 1; i <= 5; i++) {
-            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-            System.out.println("i = " + i);
+        library.addBook(new Book("Clean Code", "Robert C. Martin", "978-0132350884"));
+        library.addBook(new Book("Effective Java", "Joshua Bloch", "978-0134685991"));
+        library.addBook(new Book("The Pragmatic Programmer", "Hunt & Thomas", "978-0135957059"));
+
+        library.addMember(new Member("M001", "Nadeesha Perera"));
+        library.addMember(new Member("M002", "Kasun Silva"));
+
+        library.listBooks();
+        library.listMembers();
+
+        try {
+            library.addBook(new Book("", "Nobody", "000-0000000000"));
+        } catch (IllegalArgumentException e) {
+            System.out.println("Rejected invalid book: " + e.getMessage());
         }
     }
 }

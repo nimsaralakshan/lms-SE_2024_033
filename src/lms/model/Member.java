@@ -1,7 +1,10 @@
 package lms.model;
 
-/** Member — now the parent of Student and Staff, introduced this week. */
-public class Member {
+/**
+ * Member - parent of Student and Staff. Week 4: implements Comparable so a
+ * list of members can be sorted with Collections.sort().
+ */
+public class Member implements Comparable<Member> {
     private String memberId;
     private String name;
     private int borrowedCount;
@@ -35,6 +38,16 @@ public class Member {
     }
 
     public void incrementBorrowedCount() { setBorrowedCount(this.borrowedCount + 1); }
+
+    /**
+     * Natural order: MOST active member first (highest borrowedCount).
+     * Collections.sort(list) calls this method to decide which of two
+     * members comes first.
+     */
+    @Override
+    public int compareTo(Member other) {
+        return Integer.compare(other.borrowedCount, this.borrowedCount);
+    }
 
     @Override
     public String toString() {

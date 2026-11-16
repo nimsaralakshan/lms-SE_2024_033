@@ -1,13 +1,14 @@
 package lms.model;
 
 /**
- * LibraryItem — introduced this week as the shared parent of Book and DVD.
+ * LibraryItem - Week 4 version.
  *
- * Encapsulation (from Week 2) is still here — private fields, validated
- * setters — but the new idea this week is INHERITANCE: Book and DVD will
- * extend this class instead of repeating id/title/isBorrowed themselves.
+ * Two changes from Week 3:
+ *   1. It now IMPLEMENTS the Loanable interface (a contract it fulfils).
+ *   2. calculateLateFee() is now truly ABSTRACT - no default body.
+ *      Every subclass must write its own, or it will not compile.
  */
-public abstract class LibraryItem {
+public abstract class LibraryItem implements Loanable {
     private String id;
     private String title;
     private boolean isBorrowed;
@@ -32,13 +33,29 @@ public abstract class LibraryItem {
         this.title = title;
     }
 
-    public void borrowItem() { this.isBorrowed = true; }
-    public void returnItem() { this.isBorrowed = false; }
+    // ---- Loanable contract (shared implementation lives here) ----
 
-    /** Every subclass may override this — that's what makes Part 2 (Polymorphism) below work. */
-    public double calculateLateFee(int daysLate) {
-        return daysLate * 10.0;
+    @Override
+    public void loan(Member member) {
+        if (isBorrowed) {
+            System.out.println(title + " is already on loan.");
+        } else if (member.getBorrowedCount() >= member.getMaxBorrowLimit()) {
+            System.out.println(member.getName() + " has reached the limit of " + member.getMaxBorrowLimit() + " items.");
+        } else {
+            isBorrowed = true;
+            member.incrementBorrowedCount();
+            System.out.println(title + " loaned to " + member.getName());
+        }
     }
+
+    @Override
+    public void returnItem() {
+        isBorrowed = false;
+        System.out.println(title + " returned.");
+    }
+
+    /** No body: each subclass MUST define its own late-fee rule. */
+    public abstract double calculateLateFee(int daysLate);
 
     @Override
     public String toString() {

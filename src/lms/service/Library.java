@@ -1,5 +1,7 @@
 package lms.service;
 
+import lms.exception.ItemNotAvailableException;
+import lms.exception.MemberNotFoundException;
 import lms.model.Book;
 import lms.model.DVD;
 import lms.model.LibraryItem;
@@ -12,7 +14,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Library - Week 4 version (Abstract Classes & Interfaces).
+ * Library - Week 5 version (Exception Handling).
  *
  * Kept from Week 3: printAllLateFees(), the addItem() overloads.
  * New this week: methods that talk to INTERFACE types (Loanable,
@@ -56,8 +58,37 @@ public class Library {
      * This method would work for anything that promises to be loanable,
      * even a class that is not a LibraryItem at all.
      */
-    public void lend(Loanable thing, Member member) {
+    public void lend(Loanable thing, Member member) throws ItemNotAvailableException {
         thing.loan(member);
+    }
+
+    // ---- NEW in Week 5 ----
+
+    /** Looks a member up by id. Throws the UNCHECKED MemberNotFoundException. */
+    public Member findMember(String memberId) {
+        for (Member m : members) {
+            if (m.getMemberId().equals(memberId)) return m;
+        }
+        throw new MemberNotFoundException(memberId);
+    }
+
+    /** Looks an item up by id. Throws the CHECKED ItemNotAvailableException. */
+    public LibraryItem findItem(String itemId) throws ItemNotAvailableException {
+        for (LibraryItem i : items) {
+            if (i.getId().equals(itemId)) return i;
+        }
+        throw new ItemNotAvailableException("No item with id '" + itemId + "'");
+    }
+
+    /** The one-stop "borrow" operation the GUI will call later. */
+    public void borrowItem(String itemId, String memberId) throws ItemNotAvailableException {
+        Member member = findMember(memberId);
+        LibraryItem item = findItem(itemId);
+        item.loan(member);
+    }
+
+    public void returnItem(String itemId) throws ItemNotAvailableException {
+        findItem(itemId).returnItem();
     }
 
     /**

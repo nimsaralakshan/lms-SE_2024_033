@@ -1,12 +1,9 @@
 package lms.model;
 
-/**
- * Loanable - a contract: "anything that can be loaned to a Member".
- *
- * An interface says WHAT must be possible, never HOW. Any class that
- * implements Loanable promises to provide both methods below.
- */
+import lms.exception.ItemNotAvailableException;
+
+/** Contract for anything that can be loaned. Week 5: failures are now exceptions. */
 public interface Loanable {
-    void loan(Member member);
-    void returnItem();
+    void loan(Member member) throws ItemNotAvailableException;
+    void returnItem() throws ItemNotAvailableException;
 }

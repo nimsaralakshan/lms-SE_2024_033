@@ -36,6 +36,11 @@ public class Member implements Comparable<Member> {
         if (borrowedCount < 0) throw new IllegalArgumentException("Borrowed count cannot be negative");
         this.borrowedCount = borrowedCount;
     }
+    public void decrementBorrowedCount() {
+        if (borrowedCount > 0) {
+            borrowedCount--;
+        }
+    }
 
     public void incrementBorrowedCount() { setBorrowedCount(this.borrowedCount + 1); }
 

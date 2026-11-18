@@ -1,51 +1,81 @@
 package lms;
 
+import lms.exception.ItemNotAvailableException;
+import lms.exception.MemberNotFoundException;
 import lms.model.*;
 import lms.service.Library;
 
 /**
- * Main - Week 4 demo: Abstract Classes & Interfaces.
+ * Main - Week 5 demo: Exception Handling.
  *
  * Try this yourself:
- *   1. Delete calculateLateFee() from Magazine and compile. Read the error.
- *   2. Add "implements Reservable" to DVD and satisfy the compiler.
- *   3. Write a new class Poster that implements Loanable but is NOT a
- *      LibraryItem, then pass it to library.lend(...).
- *   4. Change compareTo() so the LEAST active member sorts first.
+ *   1. Remove the try/catch around the first borrow and read the compiler error
+ *      ("unreported exception ItemNotAvailableException").
+ *   2. Change MemberNotFoundException to extend Exception. What breaks?
+ *   3. Add a custom exception of your own: FineNotPaidException.
  */
 public class Main {
     public static void main(String[] args) {
         Library library = new Library();
+        library.addItem(new Book("B001", "Clean Code", "Robert C. Martin"));
+        library.addItem(new DVD("D001", "Introduction to Algorithms", 120));
+        library.addItem(new Magazine("G001", "Software Weekly", 42));
+        library.addMember(new Student("M001", "Nadeesha Perera"));
+        library.addMember(new Staff("M002", "Mr. Kasun Silva"));
 
-        Book book = new Book("B001", "Clean Code", "Robert C. Martin");
-        DVD dvd = new DVD("D001", "Introduction to Algorithms", 120);
-        Magazine mag = new Magazine("G001", "Software Weekly", 42);
+        System.out.println("--- 1. Happy path ---");
+        attempt(library, "B001", "M001");
 
-        library.addItem(book);
-        library.addItem(dvd);
-        library.addItem(mag);
+        System.out.println("--- 2. Already on loan (checked exception) ---");
+        attempt(library, "B001", "M002");
 
-        Student nadeesha = new Student("M001", "Nadeesha Perera");
-        Staff kasun = new Staff("M002", "Mr. Kasun Silva");
-        library.addMember(nadeesha);
-        library.addMember(kasun);
+        System.out.println("--- 3. Unknown member (unchecked exception) ---");
+        attempt(library, "D001", "M999");
 
-        // Abstract method: three classes, three different fee rules
-        library.printAllLateFees(3);
+        System.out.println("--- 4. Unknown item ---");
+        attempt(library, "X404", "M001");
 
-        // Loanable interface
-        System.out.println("--- Loans ---");
-        library.lend(book, nadeesha);
-        library.lend(book, kasun);      // already on loan
-        library.lend(dvd, kasun);
-        library.lend(mag, kasun);
+        System.out.println("--- 5. Returning something not on loan ---");
+        try {
+            library.returnItem("D001");
+        } catch (ItemNotAvailableException e) {
+            System.out.println("Cannot return: " + e.getMessage());
+        }
 
-        // Reservable interface: only Book qualifies
-        System.out.println("--- Reservations ---");
-        library.reserveIfPossible(book, kasun);
-        library.reserveIfPossible(dvd, nadeesha);
+        System.out.println("--- 6. Bad data (IllegalArgumentException) ---");
+        try {
+            new Book("B002", "   ", "Someone");
+        } catch (IllegalArgumentException e) {
+            System.out.println("Invalid book: " + e.getMessage());
+        }
 
-        // Comparable
-        library.printMembersByActivity();
+        System.out.println("--- 7. Student limit of 3 ---");
+        library.addItem(new Book("B003", "Refactoring", "Martin Fowler"));
+        library.addItem(new Book("B004", "Head First Java", "Kathy Sierra"));
+        library.addItem(new Book("B005", "Effective Java", "Joshua Bloch"));
+        for (String id : new String[]{"D001", "G001", "B003", "B004"}) {
+            attempt(library, id, "M001");
+        }
+
+        System.out.println("--- 8. Return frees a slot ---");
+        try {
+            library.returnItem("B001");
+            attempt(library, "B004", "M001");
+        } catch (ItemNotAvailableException e) {
+            System.out.println("Unexpected: " + e.getMessage());
+        }
+    }
+
+    /** One borrow attempt with all the handling in ONE place. */
+    private static void attempt(Library library, String itemId, String memberId) {
+        try {
+            library.borrowItem(itemId, memberId);
+        } catch (ItemNotAvailableException e) {          // checked
+            System.out.println("Cannot borrow: " + e.getMessage());
+        } catch (MemberNotFoundException e) {            // unchecked
+            System.out.println("Unknown member: " + e.getMemberId());
+        } finally {
+            System.out.println("   (attempt finished: item " + itemId + ", member " + memberId + ")");
+        }
     }
 }
